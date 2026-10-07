@@ -1,0 +1,35 @@
+{
+  "name": "@liquidau/text-preprocessing",
+  "version": "0.1.0",
+  "license": "MIT",
+  "description": "Reproducible document preprocessing for Liquidau: exact UTF-16 source spans, versioned deterministic splitters, an injected exact-tokenizer contract, hard token-budget chunk packing and canonical pipeline digests. No dependencies, no Node built-ins.",
+  "keywords": ["chunking", "tokenization", "source-spans", "preprocessing", "edge"],
+  "repository": { "type": "git", "url": "git+https://github.com/swim/text-preprocessing.git" },
+  "homepage": "https://github.com/swim/text-preprocessing#readme",
+  "bugs": { "url": "https://github.com/swim/text-preprocessing/issues" },
+  "type": "module",
+  "engines": { "node": ">=20" },
+  "sideEffects": false,
+  "exports": {
+    ".": {
+      "@liquidau/source": "./src/index.ts",
+      "types": "./dist/index.d.ts",
+      "default": "./dist/index.js"
+    }
+  },
+  "files": ["dist", "README.md", "LICENSE"],
+  "scripts": {
+    "build": "rm -rf dist && tsc -p tsconfig.build.json",
+    "prepack": "npm run build",
+    "test": "node --import tsx --test test/*.test.ts",
+    "typecheck": "tsc --noEmit && tsc -p tsconfig.portable.json",
+    "check:portable": "node scripts/check-portable.mjs"
+  },
+  "devDependencies": {
+    "@types/node": "^20.19.0",
+    "esbuild": "^0.25.0",
+    "tsx": "^4.19.0",
+    "typescript": "^5.9.0"
+  },
+  "publishConfig": { "access": "public" }
+}

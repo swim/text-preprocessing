@@ -1,0 +1,13 @@
+export { canonicalDigest, canonicalJson, isSha256Hex, sha256Hex, sourceDigest } from './digest.ts';
+export { isCodePointBoundary, partitionProblems, spanText } from './spans.ts';
+export type { SourceSpan, TextDocument } from './spans.ts';
+export { SPLITTER_ALGORITHMS, splitSpans } from './splitters.ts';
+export type { SplitterAlgorithm } from './splitters.ts';
+export { fixtureTokenizer, TOKENIZER_SCHEMA, tokenizerContractProblems, tokenizerIdentityProblems } from './tokenizer.ts';
+export type { TokenizerAdapter, TokenizerIdentity } from './tokenizer.ts';
+export { createPipeline, PIPELINE_SCHEMA, PipelineError, pipelineDigest, pipelineProblems, validatePipeline } from './pipeline.ts';
+export type { AdjacentCosineGrouping, DocumentPipeline, TokenPackGrouping } from './pipeline.ts';
+export { adjacentSimilarities, chunkPlanProblems, planChunks, planDigest, PREPROCESSING_ERROR_CODES, PreprocessingError } from './plan.ts';
+export type { ChunkPlan, ChunkPlanEntry, PlanOptions, PreprocessingErrorCode } from './plan.ts';
+export { budgetedEncoderProblems, ENCODER_IDENTITY_FIELDS, ENCODER_IDENTITY_SCHEMA, fullEncoderIdentityProblems, identityFields, vectorProblems } from './encoder.ts';
+export type { EncoderAdapter, FullEncoderIdentity } from './encoder.ts';
