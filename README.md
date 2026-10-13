@@ -34,3 +34,14 @@ const plan = await planChunks(text, pipeline, tokenizer, { signal, contextCharLi
   - The boundary identities, preparation and budget are part of the pipeline digest.
 
 Overlap is fixed at 0 and aggregation at `mean-chunk-vector/1`. `fullEncoderIdentityProblems`, `budgetedEncoderProblems` and `vectorProblems` are the shared encoder identity and output checks.
+
+## Edge features
+
+What an edge tier (embedding-classifier's `trainEdge`) scores, defined once so training and the edge
+compute identical inputs. No dependencies; the host supplies any bytes.
+
+| Export | What |
+|---|---|
+| `lexicalFeatures`, `lexicalWords`, `DEFAULT_LEXICAL`, `lexicalSpecProblems` | `'liquidau-lexical/1'`: word unigrams and bigrams and character 3-5-grams, FNV-1a hashed into 2^bits buckets, √count, unit length |
+| `createWordPiece` | A BERT WordPiece tokenizer from a parsed `tokenizer.json` (BertNormalizer, BertPreTokenizer, WordPiece). Matches Hugging Face's token ids exactly on 82,327 texts from five datasets (liquidau-lab `wordpiece-check.ts`) |
+| `createStaticEmbedder`, `staticIdentityProblems`, `STATIC_SCHEMA` | `'liquidau-static/1'`: the mean of precomputed token vectors (Model2Vec-style), unknown tokens dropped, at most `maxTokens` tokens, unit length; its identity records the tokenizer's and weight table's SHA-256. About 40 µs per message for potion-base-8M (256 dimensions, 29 MB) |

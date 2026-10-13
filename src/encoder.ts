@@ -1,8 +1,8 @@
 /**
- * The encoder identity and vector checks, as plain data and structural callbacks (no router types).
- * The same field definitions as @liquidau/router's EncoderIdentity; conformance fixtures in the router
- * keep the two in step. Used for the semantic-grouping boundary encoder here, and by
- * embedding-classifier for the chunk encoder.
+ * Encoder identity: everything that determines what an embedding vector means, and the checks on an
+ * identity and on its output vectors, as plain data and structural callbacks. Two encoders are
+ * interchangeable only when every field matches, layer order included. Shared by the boundary encoder
+ * here, embedding-classifier's chunk encoder and the router's release encoder.
  */
 
 export const ENCODER_IDENTITY_SCHEMA = 'liquidau-encoder/1';
@@ -15,19 +15,25 @@ export interface FullEncoderIdentity {
   dimensions: number;
   precision: string;
   inputType: string | null;
-  /** Ordered 1-based layers, or null for the model's standard embedding. */
+  /** 1-based transformer layers, in concatenation order; null for the model's standard embedding. */
   layers: number[] | null;
   pooling: string;
+  /**
+   * What the adapter actually computes: 'unit' scales the whole vector to length 1; 'per-layer-unit'
+   * scales each layer's block to length 1 before concatenation (the concatenation is NOT unit length).
+   */
   normalization: 'none' | 'unit' | 'per-layer-unit';
+  /** Tokenizer digest or version; 'provider-managed' only for hosted models with a versioned model ID. */
   tokenizerRevision: string;
   maxChars: number | null;
   maxTokens: number | null;
+  /** Named, versioned truncation algorithm, e.g. 'liquidau-truncate-utf16/1'; 'none' when input beyond the limits is rejected. */
   truncation: string;
 }
 
-/** Structurally compatible with @liquidau/router's Encoder. */
 export interface EncoderAdapter {
   readonly identity: Readonly<FullEncoderIdentity>;
+  /** One vector per text, in order. Adapters apply their preprocessing (prefixes, truncation) exactly once. */
   embed(texts: readonly string[], options: { signal: AbortSignal }): Promise<readonly (readonly number[])[]>;
 }
 
@@ -84,7 +90,10 @@ export function vectorProblems(identity: FullEncoderIdentity, vector: unknown, t
   if (identity.normalization === 'unit' && Math.abs(norm(0, v.length) - 1) > tolerance) return `norm ${norm(0, v.length)}, expected unit length`;
   if (identity.normalization === 'per-layer-unit' && identity.layers) {
     const w = v.length / identity.layers.length;
-    for (let l = 0; l < identity.layers.length; l++) if (Math.abs(norm(l * w, (l + 1) * w) - 1) > tolerance) return `layer block ${l} is not unit length`;
+    for (let l = 0; l < identity.layers.length; l++) {
+      const n = norm(l * w, (l + 1) * w);
+      if (Math.abs(n - 1) > tolerance) return `layer block ${l} has norm ${n}, expected unit length`;
+    }
   }
   return null;
 }

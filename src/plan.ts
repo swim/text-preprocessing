@@ -221,7 +221,7 @@ async function pack(pl: Planner, units: Unit[], tokenizer: TokenizerAdapter, max
   while (i < queue.length) {
     const u = queue[i];
     if (current && u.groupStart) {
-      flush(current, current.atoms, current.tokens, 'semantic');
+      flush({ start: current.start, end: current.end }, current.atoms, current.tokens, 'semantic');
       current = null;
     }
     if (current) {
@@ -232,7 +232,7 @@ async function pack(pl: Planner, units: Unit[], tokenizer: TokenizerAdapter, max
         current.tokens = n;
         i++;
       } else {
-        flush(current, current.atoms, current.tokens, 'structure');
+        flush({ start: current.start, end: current.end }, current.atoms, current.tokens, 'structure');
         current = null;
       }
       continue;
@@ -248,7 +248,7 @@ async function pack(pl: Planner, units: Unit[], tokenizer: TokenizerAdapter, max
     flush({ start: u.start, end: cut.at }, [u.atom], cut.tokens, 'budget');
     queue[i] = { start: cut.at, end: u.end, atom: u.atom, groupStart: false };
   }
-  if (current) flush(current, current.atoms, current.tokens, 'document-end');
+  if (current) flush({ start: current.start, end: current.end }, current.atoms, current.tokens, 'document-end');
   else if (chunks.length) chunks[chunks.length - 1].boundary = 'document-end';
   return chunks;
 }

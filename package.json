@@ -2,7 +2,7 @@
   "name": "@liquidau/text-preprocessing",
   "version": "0.1.0",
   "license": "MIT",
-  "description": "Reproducible document preprocessing for Liquidau: exact UTF-16 source spans, versioned deterministic splitters, an injected exact-tokenizer contract, hard token-budget chunk packing and canonical pipeline digests. No dependencies, no Node built-ins.",
+  "description": "Reproducible document preprocessing; exact UTF-16 source spans, versioned deterministic splitters, an injected exact-tokenizer contract, hard token-budget chunk packing and canonical pipeline digests. No dependencies.",
   "keywords": ["chunking", "tokenization", "source-spans", "preprocessing", "edge"],
   "repository": { "type": "git", "url": "git+https://github.com/swim/text-preprocessing.git" },
   "homepage": "https://github.com/swim/text-preprocessing#readme",

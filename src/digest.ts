@@ -18,18 +18,12 @@ const rotr = (x: number, n: number) => (x >>> n) | (x << (32 - n));
 
 /** Lowercase hex SHA-256 of exact bytes. */
 export function sha256Hex(data: Uint8Array): string {
-  const blocks = Math.ceil((data.length + 9) / 64);
-  const msg = new Uint8Array(blocks * 64);
-  msg.set(data);
-  msg[data.length] = 0x80;
-  const view = new DataView(msg.buffer);
-  const bits = data.length * 8;
-  view.setUint32(msg.length - 8, Math.floor(bits / 0x100000000));
-  view.setUint32(msg.length - 4, bits >>> 0);
+  // Full blocks are read in place (no copy of the input: weight tables are tens of megabytes); only the
+  // final one or two padded blocks are built.
   const H = new Uint32Array([0x6a09e667, 0xbb67ae85, 0x3c6ef372, 0xa54ff53a, 0x510e527f, 0x9b05688c, 0x1f83d9ab, 0x5be0cd19]);
   const W = new Uint32Array(64);
-  for (let b = 0; b < blocks; b++) {
-    for (let t = 0; t < 16; t++) W[t] = view.getUint32(b * 64 + t * 4);
+  const compress = (view: DataView, offset: number) => {
+    for (let t = 0; t < 16; t++) W[t] = view.getUint32(offset + t * 4);
     for (let t = 16; t < 64; t++) {
       const s0 = rotr(W[t - 15], 7) ^ rotr(W[t - 15], 18) ^ (W[t - 15] >>> 3);
       const s1 = rotr(W[t - 2], 17) ^ rotr(W[t - 2], 19) ^ (W[t - 2] >>> 10);
@@ -43,7 +37,19 @@ export function sha256Hex(data: Uint8Array): string {
     }
     H[0] = (H[0] + a) >>> 0; H[1] = (H[1] + bb) >>> 0; H[2] = (H[2] + c) >>> 0; H[3] = (H[3] + d) >>> 0;
     H[4] = (H[4] + e) >>> 0; H[5] = (H[5] + f) >>> 0; H[6] = (H[6] + g) >>> 0; H[7] = (H[7] + h) >>> 0;
-  }
+  };
+  const full = Math.floor(data.length / 64);
+  const view = new DataView(data.buffer, data.byteOffset, data.byteLength);
+  for (let b = 0; b < full; b++) compress(view, b * 64);
+  const rem = data.length - full * 64;
+  const tail = new Uint8Array(rem + 9 <= 64 ? 64 : 128);
+  tail.set(data.subarray(full * 64));
+  tail[rem] = 0x80;
+  const tv = new DataView(tail.buffer);
+  const bits = data.length * 8;
+  tv.setUint32(tail.length - 8, Math.floor(bits / 0x100000000));
+  tv.setUint32(tail.length - 4, bits >>> 0);
+  for (let off = 0; off < tail.length; off += 64) compress(tv, off);
   return Array.from(H, (x) => x.toString(16).padStart(8, '0')).join('');
 }
 

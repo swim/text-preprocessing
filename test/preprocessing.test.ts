@@ -152,3 +152,14 @@ test('the contract can require special tokens on the empty string', () => {
   assert.deepEqual(tokenizerContractProblems(tok, undefined, { minEmptyCount: 2 }), []);
   assert.match(tokenizerContractProblems(fixtureTokenizer({ special: 0 }), undefined, { minEmptyCount: 1 }).join(), /empty string counts 0/);
 });
+
+test('a plan\'s spans carry only start and end (nothing internal leaks into the plan or its digest)', async () => {
+  const text = 'One sentence here. Another one follows. And a third sentence to close the document.';
+  for (const alg of ['paragraph/1', 'sentence-simple/1'] as const) {
+    const plan = await planChunks(text, pipeline({ maxChunks: 1000 }, alg), tok);
+    for (const c of plan.chunks) {
+      assert.deepEqual(Object.keys(c.core).sort(), ['end', 'start']);
+      assert.deepEqual(Object.keys(c.context).sort(), ['end', 'start']);
+    }
+  }
+});

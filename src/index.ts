@@ -11,3 +11,7 @@ export { adjacentSimilarities, chunkPlanProblems, planChunks, planDigest, PREPRO
 export type { ChunkPlan, ChunkPlanEntry, PlanOptions, PreprocessingErrorCode } from './plan.ts';
 export { budgetedEncoderProblems, ENCODER_IDENTITY_FIELDS, ENCODER_IDENTITY_SCHEMA, fullEncoderIdentityProblems, identityFields, vectorProblems } from './encoder.ts';
 export type { EncoderAdapter, FullEncoderIdentity } from './encoder.ts';
+export { DEFAULT_LEXICAL, LEXICAL_SCHEMA, lexicalFeatures, lexicalSpecProblems, lexicalWords } from './lexical.ts';
+export type { LexicalSpec } from './lexical.ts';
+export { createStaticEmbedder, createWordPiece, STATIC_SCHEMA, staticIdentityProblems } from './wordpiece.ts';
+export type { StaticEmbedder, StaticIdentity, WordPieceTokenizer } from './wordpiece.ts';
